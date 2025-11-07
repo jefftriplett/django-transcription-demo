@@ -1,3 +1,5 @@
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVector, SearchVectorField
 from django.db import models
 
 
@@ -21,10 +23,22 @@ class Transcript(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Full text search vector field
+    search_vector = models.GeneratedField(
+        expression=SearchVector("youtube_id", weight="A", config="english")
+        + SearchVector("text_content", weight="B", config="english")
+        + SearchVector("srt_content", weight="C", config="english"),
+        output_field=SearchVectorField(),
+        db_persist=True,
+    )
+
     class Meta:
         ordering = ["-created_at"]
         verbose_name = "Transcript"
         verbose_name_plural = "Transcripts"
+        indexes = [
+            GinIndex(fields=["search_vector"], name="transcript_search_idx"),
+        ]
 
     def __str__(self):
         return f"Transcript for YouTube ID: {self.youtube_id}"
