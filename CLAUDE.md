@@ -101,3 +101,4 @@ Pre-commit hooks (run via `uv tool run prek`):
 ## Docker Context
 
 The web service runs `uv run -m manage devserver --skip-checks 0.0.0.0:8000` via compose-entrypoint.sh. All containers mount the project at `/src` with cache consistency. The utility container is used for running tests and management commands with `--no-deps` and `--rm` flags.
+- never run makemigrations by hand
