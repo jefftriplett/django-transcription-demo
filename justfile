@@ -78,7 +78,7 @@ bootstrap *ARGS:
         --no-deps \
         --rm \
         utility \
-            python -m manage {{ ARGS }}
+            uv run -m manage {{ ARGS }}
 
 # Dump database to file
 @pg_dump file='db.dump':
