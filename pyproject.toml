@@ -9,6 +9,7 @@ dependencies = [
     "django-click",
     "django-prodserver[gunicorn]",
     "environs[django]",
+    "mlx-whisper",
     "psycopg[binary]",
     "whitenoise",
 ]
