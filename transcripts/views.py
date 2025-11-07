@@ -21,6 +21,13 @@ def homepage(request):
             .order_by("-rank")
         )
 
+        # Print raw SQL to console for debugging
+        print("\n" + "=" * 80)
+        print("SEARCH SQL QUERY:")
+        print("=" * 80)
+        print(transcripts.query)
+        print("=" * 80 + "\n")
+
     context = {
         "query": query,
         "transcripts": transcripts,
