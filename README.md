@@ -1,114 +1,180 @@
-<h1 align="center">Welcome to django-startproject 👋</h1>
-<p>
-  <a href="https://github.com/jefftriplett/django-startproject/actions" target="_blank">
-    <img alt="CI" src="https://github.com/jefftriplett/django-startproject/workflows/CI/badge.svg" />
-  </a>
-</p>
+# Transcription App
 
-> Django startproject template with batteries
+> A Django-powered transcription service using MLX Whisper for fast, local audio/video transcription on Apple Silicon
 
-## :triangular_flag_on_post: Core Features
+This application transcribes audio and video files (including YouTube videos) using MLX Whisper, stores transcripts in a PostgreSQL database with full-text search capabilities, and outputs both SRT (subtitle) and plain text formats.
 
-- Django 5.2
-- Python 3.13
-- Docker Compose (I prefer Orbstack)
-- Justfile recipes
-- Postgres auto updates
-- uv support
-- pre-commit support via prek
+## Features
 
-## :triangular_flag_on_post: Django Features
+- **Fast Local Transcription**: Uses [MLX Whisper](https://github.com/ml-explore/mlx-examples/tree/main/whisper) optimized for Apple Silicon
+- **Multiple Model Support**: Choose between turbo, large, or parakeet models based on your needs
+- **Dual Format Output**: Generates both SRT subtitle files and plain text transcripts
+- **Database Storage**: Store and search transcripts with PostgreSQL full-text search
+- **Django Admin**: Manage transcripts through Django's admin interface
+- **Standalone Script**: Use `transcribe.py` for quick transcriptions without Django
 
-- django-click
-- django-prodserver[gunicorn]
-- environs[django]
-- psycopg[binary]
-- whitenoise
+## Tech Stack
 
-## :shirt: Linting/auto-formatting
+- **Django 5.2** with Python 3.13
+- **MLX Whisper** for transcription
+- **PostgreSQL** with full-text search and auto-upgrade
+- **Docker Compose** for containerization
+- **uv** for dependency management
+- **just** for task automation
 
-- pre-commit (using prek)
-  - Standard hooks (check-added-large-files, check-json, check-toml, check-yaml, etc.)
-  - ruff (linting and formatting)
-  - pyupgrade (Python 3.13+)
-  - django-upgrade (Django 5.0+)
-  - djhtml (Django template formatting)
-  - djade (Django 5.2 compatibility)
-  - blacken-docs (format code in documentation)
+## Prerequisites
 
-### :green_heart: CI
+- Apple Silicon Mac (M1/M2/M3/M4) for MLX Whisper
+- Docker (OrbStack recommended)
+- Python 3.13+
+- [just](https://github.com/casey/just) command runner
 
-- django-test-plus
-- model-bakery
-- pytest
-- pytest-django
+## Quick Start
 
-### 🏠 [Homepage](https://github.com/jefftriplett/django-startproject)
-
-## :wrench: Install
+### Initial Setup
 
 ```shell
-$ uv run --with=django django-admin startproject \
-    --extension=ini,py,toml,yaml,yml \
-    --template=https://github.com/jefftriplett/django-startproject/archive/main.zip \
-    example_project
+# Clone the repository
+git clone <your-repo-url>
+cd transcription-git
 
-$ cd example_project
+# Bootstrap the project (creates .env, installs dependencies, builds containers)
+just bootstrap
 
-$ just bootstrap
+# Run database migrations
+just manage migrate
+
+# Create a Django superuser (optional, for admin access)
+just manage createsuperuser
+
+# Start the development server
+just up
 ```
 
-## :rocket: Usage
+## Usage
+
+### Transcribing Audio/Video Files
+
+#### Using Django Management Command (Recommended)
 
 ```shell
-# Bootstrap our project
-$ just bootstrap
+# Transcribe a single file (outputs to captions/ directory)
+just manage transcribe path/to/audio.mp3
 
-# Build our Docker Image
-$ just build
+# Transcribe multiple files
+just manage transcribe path/to/audio1.mp3 path/to/video.mp4
 
-# Run Migrations
-$ just manage migrate
+# Use a different model (turbo, large, or parakeet)
+just manage transcribe audio.mp3 --model large
 
-# Create a Superuser in Django
-$ just manage createsuperuser
+# Include word-level timestamps
+just manage transcribe audio.mp3 --word-timestamps
 
-# Run Django on http://localhost:8000/
-$ just up
+# Overwrite existing transcriptions
+just manage transcribe audio.mp3 --overwrite
 
-# Run Django in background mode
-$ just start
-
-# Stop all running containers
-$ just down
-
-# Open a bash shell/console
-$ just console
-
-# Run Tests
-$ just test
-
-# Lint the project / run pre-commit by hand
-$ just lint
-
-# Lock dependencies with uv
-$ just lock
+# Custom output directory
+just manage transcribe audio.mp3 --output-dir my-captions
 ```
 
-## `just` Commands
+#### Using Standalone Script
 
 ```shell
-$ just --list
-```
-<!-- [[[cog
-import subprocess
-import cog
+# Run the standalone script with uv (no Django required)
+uv run transcribe.py path/to/audio.mp3
 
-list = subprocess.run(['just', '--list'], stdout=subprocess.PIPE)
-cog.out(
-    f"```\n{list.stdout.decode('utf-8')}```"
-)
-]]] -->
+# Multiple files with custom model
+uv run transcribe.py audio1.mp3 audio2.mp4 --model large
+```
+
+### Loading Transcripts into Database
+
+After transcribing files, load them into the database for searching and management:
+
+```shell
+# Load all caption files from captions/ directory
+just manage load_captions
+
+# Load from a custom directory
+just manage load_captions --captions-dir my-captions
+
+# Preview what would be loaded without saving
+just manage load_captions --dry-run
+```
+
+### Searching Transcripts
+
+Access the Django admin interface at `http://localhost:8000/admin/` to search and manage transcripts using PostgreSQL full-text search.
+
+### Common Commands
+
+```shell
+# Start the development server (foreground)
+just up
+
+# Start in background mode
+just start
+
+# Stop all containers
+just down
+
+# View logs
+just logs
+
+# Follow logs in real-time
+just tail
+
+# Open a bash console
+just console
+
+# Run tests
+just test
+
+# Lint code
+just lint
+
+# Database backup
+just pg_dump
+
+# Database restore
+just pg_restore
+```
+
+## Available Whisper Models
+
+Choose the model based on your needs for speed vs. accuracy:
+
+| Model | HuggingFace Repository | Best For |
+|-------|----------------------|----------|
+| **turbo** (default) | mlx-community/whisper-turbo | Balanced speed and accuracy |
+| **large** | mlx-community/whisper-large-v3-turbo | Highest accuracy, slower |
+| **parakeet** | mlx-community/parakeet-tdt_ctc-1.1b | Experimental alternative model |
+
+Example: `just manage transcribe video.mp4 --model large`
+
+## Project Structure
+
+```
+transcription-git/
+├── captions/              # Default output directory for transcriptions
+├── config/                # Django settings and configuration
+├── transcripts/           # Django app for managing transcripts
+│   ├── models.py         # Transcript model with full-text search
+│   ├── admin.py          # Django admin configuration
+│   └── management/
+│       └── commands/
+│           ├── transcribe.py     # Transcription command
+│           └── load_captions.py  # Import captions to database
+├── transcribe.py          # Standalone transcription script
+├── docker-compose.yml     # Container orchestration
+├── justfile              # Command shortcuts
+└── pyproject.toml        # Python dependencies
+```
+
+## All Available Commands
+
+Run `just --list` to see all available commands:
+
 ```
 Available recipes:
     bootstrap *ARGS           # Initialize project with dependencies and environment
@@ -131,31 +197,72 @@ Available recipes:
     up *ARGS                  # Start containers
     upgrade                   # Upgrade dependencies and lock
 ```
-<!-- [[[end]]] -->
+
+## Configuration
+
+Environment variables can be set in `.env` (created by `just bootstrap`):
+
+- `DATABASE_URL` - PostgreSQL connection string
+- `DJANGO_DEBUG` - Enable debug mode (default: false in production)
+- `SECRET_KEY` - Django secret key (auto-generated)
+- `ALLOWED_HOSTS` - Comma-separated list of allowed hosts
+- `ADMIN_URL` - Custom admin URL path (default: "admin/")
+
+## Development
+
+### Code Quality
+
+This project uses pre-commit hooks via [prek](https://github.com/pre-commit/pre-commit):
+
+```shell
+# Run linting
+just lint
+
+# Update hooks to latest versions
+just lint-autoupdate
+```
+
+Configured tools:
+- **ruff** - Fast Python linter and formatter
+- **pyupgrade** - Modernize Python syntax (3.13+)
+- **django-upgrade** - Upgrade Django patterns (5.0+)
+- **djhtml** - Django template formatter
+
+### Testing
+
+```shell
+# Run all tests
+just test
+
+# Run specific test file
+just test path/to/test.py
+```
+
+## Troubleshooting
+
+### MLX Whisper Issues
+
+MLX Whisper requires Apple Silicon. If you're running on a different platform, you may need to use a different transcription backend.
+
+### Container Issues
+
+```shell
+# Rebuild containers
+just build
+
+# View container logs
+just logs
+
+# Restart containers
+just restart
+```
+
+## License
+
+This project is built from the [django-startproject](https://github.com/jefftriplett/django-startproject) template.
 
 ## Author
 
-👤 **Jeff Triplett**
-
-* Website: https://jefftriplett.com
-* Micro Blog: https://micro.webology.dev
-* Mastodon: [@webology@mastodon.social](https://mastodon.social/@webology)
-* Xwitter: [@webology](https://twitter.com/webology)
-* GitHub: [@jefftriplett](https://github.com/jefftriplett)
-* Hire me: [revsys](https://www.revsys.com)
-
-## 🌟 Community Projects
-
-* [Django News Newsletter](https://django-news.com)
-* [Django News Jobs](https://jobs.django-news.com)
-* [Django Packages](https://djangopackages.org)
-* [DjangoCon US](https://djangocon.us)
-* [Awesome Django](https://awesomedjango.org)
-
-## 🤝 Contributing
-
-Contributions, issues and feature requests are welcome!<br />Feel free to check [issues page](https://github.com/jefftriplett/django-startproject/issues).
-
-## Show your support
-
-Give a ⭐️ if this project helped you!
+**Jeff Triplett**
+- Website: [jefftriplett.com](https://jefftriplett.com)
+- GitHub: [@jefftriplett](https://github.com/jefftriplett)
