@@ -140,3 +140,4 @@ cython_debug/
 
 # Custom compose options
 compose.override.yml
+static
