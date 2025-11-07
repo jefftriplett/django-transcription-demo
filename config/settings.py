@@ -52,7 +52,9 @@ INSTALLED_APPS += [
 
 # Our apps
 
-INSTALLED_APPS += []
+INSTALLED_APPS += [
+    "transcripts",
+]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
