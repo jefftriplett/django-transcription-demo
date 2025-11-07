@@ -1,262 +1,262 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transcript Search</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Transcript Search</title>
+        <style>
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: #f5f5f5;
-            padding: 20px;
-        }
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+                background-color: #f5f5f5;
+                padding: 20px;
+            }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+            }
 
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-            text-align: center;
-        }
+            h1 {
+                color: #333;
+                margin-bottom: 30px;
+                text-align: center;
+            }
 
-        .search-form {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
+            .search-form {
+                background: white;
+                padding: 30px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                margin-bottom: 30px;
+            }
 
-        .search-input-wrapper {
-            display: flex;
-            gap: 10px;
-        }
+            .search-input-wrapper {
+                display: flex;
+                gap: 10px;
+            }
 
-        input[type="text"] {
-            flex: 1;
-            padding: 12px 16px;
-            font-size: 16px;
-            border: 2px solid #ddd;
-            border-radius: 4px;
-            transition: border-color 0.3s;
-        }
+            input[type="text"] {
+                flex: 1;
+                padding: 12px 16px;
+                font-size: 16px;
+                border: 2px solid #ddd;
+                border-radius: 4px;
+                transition: border-color 0.3s;
+            }
 
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #007bff;
-        }
+            input[type="text"]:focus {
+                outline: none;
+                border-color: #007bff;
+            }
 
-        button {
-            padding: 12px 24px;
-            font-size: 16px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
+            button {
+                padding: 12px 24px;
+                font-size: 16px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
 
-        button:hover {
-            background-color: #0056b3;
-        }
+            button:hover {
+                background-color: #0056b3;
+            }
 
-        .results-info {
-            margin-bottom: 20px;
-            color: #666;
-        }
+            .results-info {
+                margin-bottom: 20px;
+                color: #666;
+            }
 
-        .transcript-card {
-            background: white;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+            .transcript-card {
+                background: white;
+                padding: 20px;
+                margin-bottom: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
 
-        .transcript-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 15px;
-        }
+            .transcript-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: start;
+                margin-bottom: 15px;
+            }
 
-        .youtube-id {
-            font-size: 18px;
-            font-weight: bold;
-        }
+            .youtube-id {
+                font-size: 18px;
+                font-weight: bold;
+            }
 
-        .youtube-id a {
-            color: #333;
-            text-decoration: none;
-        }
+            .youtube-id a {
+                color: #333;
+                text-decoration: none;
+            }
 
-        .youtube-id a:hover {
-            color: #007bff;
-        }
+            .youtube-id a:hover {
+                color: #007bff;
+            }
 
-        .action-links {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
+            .action-links {
+                display: flex;
+                gap: 15px;
+                align-items: center;
+            }
 
-        .youtube-link,
-        .detail-link {
-            color: #007bff;
-            text-decoration: none;
-            font-size: 14px;
-        }
+            .youtube-link,
+            .detail-link {
+                color: #007bff;
+                text-decoration: none;
+                font-size: 14px;
+            }
 
-        .youtube-link:hover,
-        .detail-link:hover {
-            text-decoration: underline;
-        }
+            .youtube-link:hover,
+            .detail-link:hover {
+                text-decoration: underline;
+            }
 
-        .transcript-content {
-            color: #555;
-            line-height: 1.6;
-            max-height: 200px;
-            overflow: hidden;
-            position: relative;
-        }
+            .transcript-content {
+                color: #555;
+                line-height: 1.6;
+                max-height: 200px;
+                overflow: hidden;
+                position: relative;
+            }
 
-        .transcript-content.expanded {
-            max-height: none;
-        }
+            .transcript-content.expanded {
+                max-height: none;
+            }
 
-        .expand-button {
-            background: none;
-            color: #007bff;
-            padding: 5px 0;
-            margin-top: 10px;
-            font-size: 14px;
-        }
+            .expand-button {
+                background: none;
+                color: #007bff;
+                padding: 5px 0;
+                margin-top: 10px;
+                font-size: 14px;
+            }
 
-        .expand-button:hover {
-            text-decoration: underline;
-        }
+            .expand-button:hover {
+                text-decoration: underline;
+            }
 
-        .no-results {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
+            .no-results {
+                text-align: center;
+                padding: 40px;
+                color: #666;
+            }
 
-        .search-prompt {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-        }
+            .search-prompt {
+                text-align: center;
+                padding: 40px;
+                color: #999;
+            }
 
-        .timestamp {
-            font-size: 12px;
-            color: #999;
-            margin-top: 10px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Transcript Search</h1>
+            .timestamp {
+                font-size: 12px;
+                color: #999;
+                margin-top: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Transcript Search</h1>
 
-        <div class="search-form">
-            <form method="get" action="">
-                <div class="search-input-wrapper">
-                    <input
-                        type="text"
-                        name="q"
-                        placeholder="Search transcripts by YouTube ID or content..."
-                        value="{{ query }}"
-                        autofocus
-                    >
-                    <button type="submit">Search</button>
-                </div>
-            </form>
-        </div>
-
-        {% if query %}
-            <div class="results-info">
-                {% if transcripts %}
-                    Found {{ transcripts.count }} result{{ transcripts.count|pluralize }} for "{{ query }}"
-                {% else %}
-                    No results found for "{{ query }}"
-                {% endif %}
+            <div class="search-form">
+                <form method="get" action="">
+                    <div class="search-input-wrapper">
+                        <input
+                            type="text"
+                            name="q"
+                            placeholder="Search transcripts by YouTube ID or content..."
+                            value="{{ query }}"
+                            autofocus
+                        >
+                        <button type="submit">Search</button>
+                    </div>
+                </form>
             </div>
 
-            {% if transcripts %}
-                {% for transcript in transcripts %}
-                    <div class="transcript-card">
-                        <div class="transcript-header">
-                            <div class="youtube-id">
-                                <a href="{% url 'transcripts:detail' transcript.youtube_id %}">
-                                    {{ transcript.youtube_id }}
-                                </a>
-                            </div>
-                            <div class="action-links">
-                                <a href="{% url 'transcripts:detail' transcript.youtube_id %}" class="detail-link">
-                                    View Details →
-                                </a>
-                                <a href="{{ transcript.youtube_url }}" target="_blank" class="youtube-link">
-                                    Watch on YouTube →
-                                </a>
-                            </div>
-                        </div>
+            {% if query %}
+                <div class="results-info">
+                    {% if transcripts %}
+                        Found {{ transcripts.count }} result{{ transcripts.count|pluralize }} for "{{ query }}"
+                    {% else %}
+                        No results found for "{{ query }}"
+                    {% endif %}
+                </div>
 
-                        {% if transcript.text_content %}
-                            <div class="transcript-content" id="content-{{ transcript.id }}">
-                                {{ transcript.text_content|truncatewords:100 }}
+                {% if transcripts %}
+                    {% for transcript in transcripts %}
+                        <div class="transcript-card">
+                            <div class="transcript-header">
+                                <div class="youtube-id">
+                                    <a href="{% url 'transcripts:detail' transcript.youtube_id %}">
+                                        {{ transcript.youtube_id }}
+                                    </a>
+                                </div>
+                                <div class="action-links">
+                                    <a href="{% url 'transcripts:detail' transcript.youtube_id %}" class="detail-link">
+                                        View Details →
+                                    </a>
+                                    <a href="{{ transcript.youtube_url }}" target="_blank" class="youtube-link">
+                                        Watch on YouTube →
+                                    </a>
+                                </div>
                             </div>
-                            {% if transcript.text_content|wordcount > 100 %}
-                                <button class="expand-button" onclick="toggleExpand({{ transcript.id }})">
-                                    Show more
-                                </button>
+
+                            {% if transcript.text_content %}
+                                <div class="transcript-content" id="content-{{ transcript.id }}">
+                                    {{ transcript.text_content|truncatewords:100 }}
+                                </div>
+                                {% if transcript.text_content|wordcount > 100 %}
+                                    <button class="expand-button" onclick="toggleExpand({{ transcript.id }})">
+                                        Show more
+                                    </button>
+                                {% endif %}
+                            {% else %}
+                                <div class="transcript-content">
+                                    <em>No text content available</em>
+                                </div>
                             {% endif %}
-                        {% else %}
-                            <div class="transcript-content">
-                                <em>No text content available</em>
-                            </div>
-                        {% endif %}
 
-                        <div class="timestamp">
-                            Added {{ transcript.created_at|date:"F j, Y, g:i a" }}
+                            <div class="timestamp">
+                                Added {{ transcript.created_at|date:"F j, Y, g:i a" }}
+                            </div>
                         </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-results">
+                        Try a different search term
                     </div>
-                {% endfor %}
+                {% endif %}
             {% else %}
-                <div class="no-results">
-                    Try a different search term
+                <div class="search-prompt">
+                    Enter a search term to find transcripts
                 </div>
             {% endif %}
-        {% else %}
-            <div class="search-prompt">
-                Enter a search term to find transcripts
-            </div>
-        {% endif %}
-    </div>
+        </div>
 
-    <script>
-        function toggleExpand(id) {
-            const content = document.getElementById('content-' + id);
-            const button = content.nextElementSibling;
+        <script>
+            function toggleExpand(id) {
+                const content = document.getElementById('content-' + id);
+                const button = content.nextElementSibling;
 
-            if (content.classList.contains('expanded')) {
-                content.classList.remove('expanded');
-                button.textContent = 'Show more';
-            } else {
-                content.classList.add('expanded');
-                button.textContent = 'Show less';
+                if (content.classList.contains('expanded')) {
+                    content.classList.remove('expanded');
+                    button.textContent = 'Show more';
+                } else {
+                    content.classList.add('expanded');
+                    button.textContent = 'Show less';
+                }
             }
-        }
-    </script>
-</body>
+        </script>
+    </body>
 </html>

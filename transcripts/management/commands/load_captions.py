@@ -76,8 +76,7 @@ def command(captions_dir, dry_run):
 
         if dry_run:
             click.echo(
-                f"[DRY RUN] Would process {youtube_id}: "
-                f"SRT={len(srt_content)} chars, TXT={len(text_content)} chars"
+                f"[DRY RUN] Would process {youtube_id}: SRT={len(srt_content)} chars, TXT={len(text_content)} chars"
             )
             continue
 
@@ -93,15 +92,13 @@ def command(captions_dir, dry_run):
         if created:
             created_count += 1
             click.secho(
-                f"Created transcript for {youtube_id}: "
-                f"SRT={len(srt_content)} chars, TXT={len(text_content)} chars",
+                f"Created transcript for {youtube_id}: SRT={len(srt_content)} chars, TXT={len(text_content)} chars",
                 fg="green",
             )
         else:
             updated_count += 1
             click.secho(
-                f"Updated transcript for {youtube_id}: "
-                f"SRT={len(srt_content)} chars, TXT={len(text_content)} chars",
+                f"Updated transcript for {youtube_id}: SRT={len(srt_content)} chars, TXT={len(text_content)} chars",
                 fg="green",
             )
 
