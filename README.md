@@ -40,7 +40,6 @@ cd transcription-git
 
 # Bootstrap the project (creates .env, installs dependencies, builds containers)
 `just bootstrap`
-`just build`
 
 # Run database migrations
 `just manage migrate`
