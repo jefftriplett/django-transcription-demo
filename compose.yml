@@ -8,8 +8,8 @@ x-common-settings: &common-settings
       condition: service_healthy
   environment:
     - "ALLOWED_HOSTS=*"
-    - "DATABASE_URL=postgres://postgres@db/postgres"
     - "DJANGO_DEBUG=true"
+  env_file: .env
   restart: on-failure
   volumes:
     - .:/src:cache
