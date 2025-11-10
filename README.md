@@ -39,10 +39,11 @@ git clone <your-repo-url>
 cd transcription-git
 
 # Bootstrap the project (creates .env, installs dependencies, builds containers)
-just bootstrap
+`just bootstrap`
+`just build`
 
 # Run database migrations
-just manage migrate
+`just manage migrate`
 
 # Create a Django superuser (optional, for admin access)
 just manage createsuperuser
@@ -55,36 +56,25 @@ just up
 
 ### Transcribing Audio/Video Files
 
-#### Using Django Management Command (Recommended)
+#### Using Standalone Script
+
+> **Note**: The transcription script runs outside of Docker due to MLX Whisper's Apple Silicon requirements, which can cause issues when running inside Docker containers.
 
 ```shell
 # Transcribe a single file (outputs to captions/ directory)
-just manage transcribe path/to/audio.mp3
+uv run scripts/transcribe.py path/to/audio.mp3
 
 # Transcribe multiple files
-just manage transcribe path/to/audio1.mp3 path/to/video.mp4
+uv run scripts/transcribe.py path/to/audio1.mp3 path/to/video.mp4
 
 # Use a different model (turbo, large, or parakeet)
-just manage transcribe audio.mp3 --model large
+uv run scripts/transcribe.py audio.mp3 --model large
 
 # Include word-level timestamps
-just manage transcribe audio.mp3 --word-timestamps
+uv run scripts/transcribe.py audio.mp3 --word-timestamps
 
 # Overwrite existing transcriptions
-just manage transcribe audio.mp3 --overwrite
-
-# Custom output directory
-just manage transcribe audio.mp3 --output-dir my-captions
-```
-
-#### Using Standalone Script
-
-```shell
-# Run the standalone script with uv (no Django required)
-uv run transcribe.py path/to/audio.mp3
-
-# Multiple files with custom model
-uv run transcribe.py audio1.mp3 audio2.mp4 --model large
+uv run scripts/transcribe.py audio.mp3 --overwrite
 ```
 
 ### Loading Transcripts into Database
@@ -158,14 +148,14 @@ Example: `just manage transcribe video.mp4 --model large`
 transcription-git/
 ├── captions/              # Default output directory for transcriptions
 ├── config/                # Django settings and configuration
+├── scripts/
+│   └── transcribe.py      # Standalone transcription script (runs outside Docker)
 ├── transcripts/           # Django app for managing transcripts
 │   ├── models.py         # Transcript model with full-text search
 │   ├── admin.py          # Django admin configuration
 │   └── management/
 │       └── commands/
-│           ├── transcribe.py     # Transcription command
 │           └── load_captions.py  # Import captions to database
-├── transcribe.py          # Standalone transcription script
 ├── docker-compose.yml     # Container orchestration
 ├── justfile              # Command shortcuts
 └── pyproject.toml        # Python dependencies
@@ -194,6 +184,7 @@ Available recipes:
     stop *ARGS                # Stop services (alias for down)
     tail                      # Show and follow logs
     test *ARGS                # Run pytest with arguments
+    transcribe *ARGS          # Transcribe audio/video files (runs outside Docker)
     up *ARGS                  # Start containers
     upgrade                   # Upgrade dependencies and lock
 ```
