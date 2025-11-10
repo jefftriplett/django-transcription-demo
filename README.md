@@ -4,6 +4,12 @@
 
 This application transcribes audio and video files (including YouTube videos) using MLX Whisper, stores transcripts in a PostgreSQL database with full-text search capabilities, and outputs both SRT (subtitle) and plain text formats.
 
+## About This Project
+
+This project was built during a livestream collaboration between Jay Miller and Jeff Triplett:
+
+- **Part 1**: [Building a Django Transcription App with MLX Whisper](https://www.youtube.com/live/ycjNznwGVn0)
+
 ## Features
 
 - **Fast Local Transcription**: Uses [MLX Whisper](https://github.com/ml-explore/mlx-examples/tree/main/whisper) optimized for Apple Silicon
