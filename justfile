@@ -134,10 +134,6 @@ bootstrap *ARGS:
         --rm \
         utility python -m pytest {{ ARGS }}
 
-# Transcribe audio/video files (runs outside Docker)
-@transcribe *ARGS:
-    uv run scripts/transcribe.py {{ ARGS }}
-
 # Start containers
 @up *ARGS:
     docker compose up {{ ARGS }}
