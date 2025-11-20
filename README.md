@@ -189,7 +189,6 @@ Available recipes:
     stop *ARGS                # Stop services (alias for down)
     tail                      # Show and follow logs
     test *ARGS                # Run pytest with arguments
-    transcribe *ARGS          # Transcribe audio/video files (runs outside Docker)
     up *ARGS                  # Start containers
     upgrade                   # Upgrade dependencies and lock
 ```

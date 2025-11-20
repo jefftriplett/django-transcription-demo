@@ -6,6 +6,7 @@
 #     "typer",
 # ]
 # ///
+import re
 from enum import Enum
 from pathlib import Path
 
@@ -21,6 +22,15 @@ class ModelChoices(str, Enum):
     parakeet = "mlx-community/parakeet-tdt_ctc-1.1b"
 
 
+def extract_youtube_id(filename: str) -> str:
+    """Extract YouTube ID from filename. Expected format: 'Title [YouTubeID].ext'"""
+    match = re.search(r'\[([a-zA-Z0-9_-]{11})\]', filename)
+    if match:
+        return match.group(1)
+    # Fallback to filename stem if no YouTube ID found
+    return Path(filename).stem
+
+
 def main(
     input_paths: list[str],
     model: ModelChoices = ModelChoices.turbo,
@@ -32,10 +42,11 @@ def main(
 
     for input_path in input_paths:
         filename_stem = Path(input_path).stem
+        youtube_id = extract_youtube_id(filename_stem)
 
         # Define output paths for both formats
-        srt_filename = f"{filename_stem}.srt"
-        txt_filename = f"{filename_stem}.txt"
+        srt_filename = f"{youtube_id}.srt"
+        txt_filename = f"{youtube_id}.txt"
         srt_path = output_dir.joinpath(srt_filename)
         txt_path = output_dir.joinpath(txt_filename)
 
