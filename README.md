@@ -195,9 +195,32 @@ Available recipes:
 
 ## Configuration
 
+### Database Setup
+
+This demo is configured to work with **any PostgreSQL database**, including:
+- **Aiven PostgreSQL** (recommended for cloud deployments)
+- Local PostgreSQL (via Docker Compose)
+- Any other PostgreSQL-compatible database
+
+To use a PostgreSQL database, set the `DATABASE_URL` environment variable with your connection string:
+
+```
+DATABASE_URL=postgresql://username:password@hostname:port/database_name
+```
+
+**Aiven Example:**
+```
+DATABASE_URL=postgresql://avnadmin:your-password@pg-xxxxx.aivencloud.com:12345/defaultdb
+```
+
+**Local Docker Database:**
+The default Docker Compose setup automatically creates a PostgreSQL container. The `DATABASE_URL` is automatically configured in `.env` during `just bootstrap`.
+
+### Environment Variables
+
 Environment variables can be set in `.env` (created by `just bootstrap`):
 
-- `DATABASE_URL` - PostgreSQL connection string
+- `DATABASE_URL` - PostgreSQL connection string (Aiven, local Docker, or any PostgreSQL database)
 - `DJANGO_DEBUG` - Enable debug mode (default: false in production)
 - `SECRET_KEY` - Django secret key (auto-generated)
 - `ALLOWED_HOSTS` - Comma-separated list of allowed hosts
