@@ -80,30 +80,6 @@ bootstrap *ARGS:
         utility \
             uv run -m manage {{ ARGS }}
 
-# Dump database to file
-@pg_dump file='db.dump':
-    docker compose run \
-        --no-deps \
-        --rm \
-        db pg_dump \
-            --dbname "${DATABASE_URL:=postgres://postgres@db/postgres}" \
-            --file /src/{{ file }} \
-            --format=c \
-            --verbose
-
-# Restore database dump from file
-@pg_restore file='db.dump':
-    docker compose run \
-        --no-deps \
-        --rm \
-        db pg_restore \
-            --clean \
-            --dbname "${DATABASE_URL:=postgres://postgres@db/postgres}" \
-            --if-exists \
-            --no-owner \
-            --verbose \
-            /src/{{ file }}
-
 # Restart containers
 @restart *ARGS:
     docker compose restart {{ ARGS }}
