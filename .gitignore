@@ -142,4 +142,6 @@ cython_debug/
 compose.override.yml
 static
 .envrc
+.mkv
+.mp4
 captions
