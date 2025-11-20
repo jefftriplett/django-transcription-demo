@@ -241,7 +241,7 @@
                         <div class="toggle-switch" id="toggle-switch">
                             <button
                                 type="button"
-                                class="toggle-option {% if search_type != 'trigram' %}active{% endif %}"
+                                class="toggle-option {% if search_type != 'trigram' and search_type != 'vector' %}active{% endif %}"
                                 data-value="fts"
                                 onclick="setSearchType('fts', event)"
                             >
@@ -254,6 +254,14 @@
                                 onclick="setSearchType('trigram', event)"
                             >
                                 Trigram Similarity
+                            </button>
+                            <button
+                                type="button"
+                                class="toggle-option {% if search_type == 'vector' %}active{% endif %}"
+                                data-value="vector"
+                                onclick="setSearchType('vector', event)"
+                            >
+                                Vector/Semantic
                             </button>
                         </div>
                     </div>

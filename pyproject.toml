@@ -10,6 +10,7 @@ dependencies = [
     "django-prodserver[gunicorn]",
     "environs[django]",
     "psycopg[binary]",
+    "sentence-transformers",
     "whitenoise",
 ]
 

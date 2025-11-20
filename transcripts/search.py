@@ -1,12 +1,31 @@
 """
-Search utilities for transcripts with support for Full Text Search, Trigram Search, and Hybrid approaches.
+Search utilities for transcripts with support for Full Text Search, Trigram Search, Vector Search, and Hybrid approaches.
 """
 
 from django.contrib.postgres.search import SearchQuery, SearchRank, TrigramSimilarity
 from django.db.models import F, FloatField, Q, Value
 from django.db.models.functions import Cast, Greatest
+from sentence_transformers import SentenceTransformer
 
 from .models import SRTSegment, SearchConfig, Transcript
+
+# Initialize embedding model
+_embedding_model = None
+
+
+def get_embedding_model():
+    """Get or initialize the sentence transformer model."""
+    global _embedding_model
+    if _embedding_model is None:
+        _embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+    return _embedding_model
+
+
+def get_embedding(text):
+    """Generate embedding for a text string."""
+    model = get_embedding_model()
+    embedding = model.encode(text, convert_to_numpy=True)
+    return embedding.tolist()
 
 
 def get_search_config():
@@ -31,6 +50,45 @@ def trigram_search_segments(query):
         .filter(similarity__gt=0.05)  # Filter by minimum similarity threshold
         .order_by("-similarity")
     )
+
+
+def vector_search_segments(query):
+    """
+    Search SRTSegment using semantic similarity with vector embeddings.
+    Uses pgvector cosine similarity to find semantically similar segments.
+    Returns segments ordered by similarity score.
+    """
+    if not query or not query.strip():
+        return SRTSegment.objects.none()
+
+    query = query.strip()
+    query_embedding = get_embedding(query)
+
+    # Use Django ORM to query with pgvector cosine similarity
+    # The <-> operator performs cosine distance, so we negate it for similarity
+    from django.db import connection
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT id, (1 - (embedding <-> %s::vector)) as similarity
+            FROM transcripts_srtsegment
+            WHERE embedding IS NOT NULL
+            ORDER BY similarity DESC
+            LIMIT 100
+            """,
+            [str(query_embedding)],
+        )
+        result_ids = [row[0] for row in cursor.fetchall()]
+
+    if not result_ids:
+        return SRTSegment.objects.none()
+
+    # Fetch segments and preserve order
+    segments_dict = {seg.id: seg for seg in SRTSegment.objects.filter(id__in=result_ids)}
+    return SRTSegment.objects.filter(id__in=result_ids).order_by(
+        "id"
+    )  # Return in order they were found
 
 
 def fts_search_segments(query):
@@ -108,7 +166,7 @@ def search_segments(query, search_type=None):
 
     Args:
         query: Search query string
-        search_type: Type of search ('fts', 'trigram', 'hybrid').
+        search_type: Type of search ('fts', 'trigram', 'vector', 'hybrid').
                      If None, uses the default from SearchConfig.
 
     Returns:
@@ -125,6 +183,8 @@ def search_segments(query, search_type=None):
         return trigram_search_segments(query)
     elif search_type == "fts":
         return fts_search_segments(query)
+    elif search_type == "vector":
+        return vector_search_segments(query)
     else:  # hybrid or default
         return hybrid_search_segments(query)
 

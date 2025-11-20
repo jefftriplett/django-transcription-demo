@@ -5,9 +5,9 @@ from .search import search_transcripts, search_segments
 
 
 def homepage(request):
-    """Homepage with search functionality for transcripts using FTS or Trigram search."""
+    """Homepage with search functionality for transcripts using FTS, Trigram, or Vector search."""
     query = request.GET.get("q", "").strip()
-    search_type = request.GET.get("search_type", "fts")  # 'fts' or 'trigram'
+    search_type = request.GET.get("search_type", "fts")  # 'fts', 'trigram', or 'vector'
     transcripts = []
     segments = []
 
@@ -18,6 +18,8 @@ def homepage(request):
         # If segments exist, also search them with the specified method
         if search_type == "trigram":
             segments = search_segments(query, search_type="trigram")
+        elif search_type == "vector":
+            segments = search_segments(query, search_type="vector")
         elif search_type == "fts":
             segments = search_segments(query, search_type="fts")
 
