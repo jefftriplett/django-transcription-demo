@@ -101,4 +101,21 @@ Pre-commit hooks (run via `uv tool run prek`):
 ## Docker Context
 
 The web service runs `uv run -m manage devserver --skip-checks 0.0.0.0:8000` via compose-entrypoint.sh. All containers mount the project at `/src` with cache consistency. The utility container is used for running tests and management commands with `--no-deps` and `--rm` flags.
-- never run makemigrations by hand
+
+## Transcription Workflow
+
+This project includes MLX Whisper for audio/video transcription:
+
+- **Standalone script**: `uv run scripts/transcribe.py` runs outside Docker (MLX requires Apple Silicon)
+- **Output directory**: Transcriptions are saved to `captions/` by default
+- **Loading to database**: Use `just manage load_captions` to import transcripts into PostgreSQL
+- **Models**: Supports turbo (default), large, and parakeet models
+
+## Important Rules
+
+**Database Migrations:**
+- Never run `makemigrations` by hand unless explicitly requested
+- Always use `just manage migrate` for running migrations
+
+**Files to Ignore:**
+- Ignore all files in the `captions/` folder (transcription output directory)
