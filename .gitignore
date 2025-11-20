@@ -141,3 +141,7 @@ cython_debug/
 # Custom compose options
 compose.override.yml
 static
+.envrc
+.mkv
+.mp4
+captions
