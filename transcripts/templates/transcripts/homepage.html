@@ -163,6 +163,59 @@
                 color: #999;
                 margin-top: 10px;
             }
+
+            .search-options {
+                margin-top: 20px;
+                padding-top: 20px;
+                border-top: 1px solid #eee;
+                display: flex;
+                align-items: center;
+                gap: 20px;
+            }
+
+            .search-type-label {
+                font-size: 14px;
+                color: #555;
+                font-weight: 500;
+            }
+
+            .toggle-switch {
+                display: inline-flex;
+                align-items: center;
+                background-color: #e9ecef;
+                border-radius: 20px;
+                padding: 4px;
+                cursor: pointer;
+                border: 2px solid #dee2e6;
+                transition: all 0.3s ease;
+            }
+
+            .toggle-switch.active {
+                border-color: #007bff;
+                background-color: #e7f3ff;
+            }
+
+            .toggle-option {
+                padding: 8px 16px;
+                border-radius: 16px;
+                font-size: 14px;
+                font-weight: 500;
+                transition: all 0.3s ease;
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                color: #666;
+            }
+
+            .toggle-option.active {
+                background-color: white;
+                color: #007bff;
+                box-shadow: 0 2px 4px rgba(0,123,255,0.2);
+            }
+
+            .toggle-option:hover:not(.active) {
+                color: #333;
+            }
         </style>
     </head>
     <body>
@@ -170,7 +223,7 @@
             <h1>Transcript Search</h1>
 
             <div class="search-form">
-                <form method="get" action="">
+                <form method="get" action="" id="search-form">
                     <div class="search-input-wrapper">
                         <input
                             type="text"
@@ -180,6 +233,29 @@
                             autofocus
                         >
                         <button type="submit">Search</button>
+                    </div>
+                    <input type="hidden" name="search_type" id="search_type_input" value="{{ search_type|default:'fts' }}">
+
+                    <div class="search-options">
+                        <span class="search-type-label">Search Method:</span>
+                        <div class="toggle-switch" id="toggle-switch">
+                            <button
+                                type="button"
+                                class="toggle-option {% if search_type != 'trigram' %}active{% endif %}"
+                                data-value="fts"
+                                onclick="setSearchType('fts', event)"
+                            >
+                                Full Text Search
+                            </button>
+                            <button
+                                type="button"
+                                class="toggle-option {% if search_type == 'trigram' %}active{% endif %}"
+                                data-value="trigram"
+                                onclick="setSearchType('trigram', event)"
+                            >
+                                Trigram Similarity
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -255,6 +331,28 @@
                 } else {
                     content.classList.add('expanded');
                     button.textContent = 'Show less';
+                }
+            }
+
+            function setSearchType(type, event) {
+                event.preventDefault();
+
+                // Update hidden input
+                document.getElementById('search_type_input').value = type;
+
+                // Update active button styling
+                const buttons = document.querySelectorAll('.toggle-option');
+                buttons.forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.getAttribute('data-value') === type) {
+                        btn.classList.add('active');
+                    }
+                });
+
+                // Submit form if there's a query
+                const queryInput = document.querySelector('input[name="q"]');
+                if (queryInput.value.trim()) {
+                    document.getElementById('search-form').submit();
                 }
             }
         </script>
