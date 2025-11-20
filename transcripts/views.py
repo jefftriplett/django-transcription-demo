@@ -1,45 +1,65 @@
-from django.contrib.postgres.search import SearchQuery, SearchRank
 from django.shortcuts import get_object_or_404, render
 
-from .models import Transcript
+from .models import Transcript, SRTSegment
+from .search import search_transcripts, search_segments
 
 
 def homepage(request):
-    """Homepage with search functionality for transcripts using PostgreSQL Full Text Search."""
+    """Homepage with search functionality for transcripts using FTS, Trigram, or Vector search."""
     query = request.GET.get("q", "").strip()
+    search_type = request.GET.get("search_type", "fts")  # 'fts', 'trigram', or 'vector'
     transcripts = []
+    segments = []
 
     if query:
-        # Use PostgreSQL Full Text Search with the pre-computed search_vector field
-        search_query = SearchQuery(query, search_type="websearch", config="english")
+        # Search transcripts using specified search type
+        transcripts = search_transcripts(query)
 
-        transcripts = (
-            Transcript.objects.annotate(
-                rank=SearchRank("search_vector", search_query),
-            )
-            .filter(search_vector=search_query)
-            .order_by("-rank")
-        )
+        # If segments exist, also search them with the specified method
+        if search_type == "trigram":
+            segments = search_segments(query, search_type="trigram")
+        elif search_type == "vector":
+            segments = search_segments(query, search_type="vector")
+        elif search_type == "fts":
+            segments = search_segments(query, search_type="fts")
 
         # Print raw SQL to console for debugging
         print("\n" + "=" * 80)
-        print("SEARCH SQL QUERY:")
+        print(f"SEARCH QUERY: '{query}' (search_type: {search_type})")
         print("=" * 80)
-        print(transcripts.query)
+        if transcripts:
+            print("TRANSCRIPT SEARCH SQL:")
+            print(transcripts.query)
+        if segments:
+            print("\nSEGMENT SEARCH SQL:")
+            print(segments.query)
         print("=" * 80 + "\n")
 
     context = {
         "query": query,
+        "search_type": search_type,
         "transcripts": transcripts,
+        "segments": segments,
     }
     return render(request, "transcripts/homepage.html", context)
 
 
 def transcript_detail(request, youtube_id):
-    """Detail view for a single transcript."""
+    """Detail view for a single transcript with segment search."""
     transcript = get_object_or_404(Transcript, youtube_id=youtube_id)
+    query = request.GET.get("q", "").strip()
+    search_type = request.GET.get("search_type", None)
+    segments = []
+
+    if query:
+        # Search segments within this transcript
+        all_segments = search_segments(query, search_type=search_type)
+        segments = all_segments.filter(transcript=transcript)
 
     context = {
         "transcript": transcript,
+        "query": query,
+        "search_type": search_type,
+        "segments": segments,
     }
     return render(request, "transcripts/detail.html", context)

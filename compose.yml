@@ -3,9 +3,6 @@ x-common-settings: &common-settings
     context: .
     dockerfile: ./Dockerfile
     target: release
-  depends_on:
-    db:
-      condition: service_healthy
   environment:
     - "ALLOWED_HOSTS=*"
     - "DJANGO_DEBUG=true"
@@ -15,21 +12,6 @@ x-common-settings: &common-settings
     - .:/src:cache
 
 services:
-
-  db:
-    environment:
-      - "POSTGRES_HOST_AUTH_METHOD=trust"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-d", "postgres"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
-    image: "pgautoupgrade/pgautoupgrade:17-alpine"
-    init: true
-    user: postgres
-    volumes:
-      - .:/src:cache
-      - postgres-data:/var/lib/postgresql/data/
 
   utility:
     <<: *common-settings
@@ -58,6 +40,3 @@ services:
     ports:
       - "8000:8000"
     tty: true
-
-volumes:
-  postgres-data:

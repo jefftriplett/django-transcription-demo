@@ -4,7 +4,8 @@ from pathlib import Path
 
 import djclick as click
 
-from transcripts.models import Transcript
+from transcripts.models import SRTSegment, Transcript
+from transcripts.search import get_embedding
 
 
 @click.command()
@@ -18,7 +19,12 @@ from transcripts.models import Transcript
     is_flag=True,
     help="Show what would be loaded without actually saving to the database",
 )
-def command(captions_dir, dry_run):
+@click.option(
+    "--generate-embeddings",
+    is_flag=True,
+    help="Generate vector embeddings for segments after loading (default: False)",
+)
+def command(captions_dir, dry_run, generate_embeddings):
     """Load caption files from the captions directory and store them as Transcript objects."""
     captions_dir = Path(captions_dir)
 
@@ -111,3 +117,36 @@ def command(captions_dir, dry_run):
     if skipped_count:
         click.secho(f"Skipped: {skipped_count}", fg="yellow")
     click.echo("=" * 70)
+
+    # Generate embeddings if requested
+    if generate_embeddings and not dry_run:
+        click.echo("\nGenerating embeddings for newly created/updated segments...")
+        segments_without_embeddings = SRTSegment.objects.filter(embedding__isnull=True).order_by(
+            "transcript", "segment_index"
+        )
+        total_to_embed = segments_without_embeddings.count()
+
+        if total_to_embed > 0:
+            click.echo(f"Found {total_to_embed} segments without embeddings")
+            processed_embeddings = 0
+            failed_embeddings = 0
+
+            for i, segment in enumerate(segments_without_embeddings, 1):
+                try:
+                    embedding = get_embedding(segment.text)
+                    segment.embedding = embedding
+                    segment.embedding_model = "all-MiniLM-L6-v2"
+                    segment.save(update_fields=["embedding", "embedding_model"])
+                    processed_embeddings += 1
+
+                    if i % 10 == 0:
+                        click.secho(f"Embedded: {i}/{total_to_embed}", fg="blue")
+                except Exception as e:
+                    failed_embeddings += 1
+                    click.secho(f"Error embedding segment {segment.id}: {e}", fg="red")
+
+            click.secho(f"\nEmbeddings generated: {processed_embeddings}", fg="green")
+            if failed_embeddings > 0:
+                click.secho(f"Failed: {failed_embeddings}", fg="red")
+        else:
+            click.secho("All segments already have embeddings", fg="green")
