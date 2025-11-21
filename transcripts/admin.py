@@ -53,8 +53,55 @@ class SRTSegmentAdmin(admin.ModelAdmin):
 
 @admin.register(SearchConfig)
 class SearchConfigAdmin(admin.ModelAdmin):
-    list_display = ["default_search_type", "fts_weight", "trigram_weight", "vector_weight"]
+    list_display = [
+        "default_search_type",
+        "search_methods_status",
+        "fts_weight",
+        "trigram_weight",
+        "vector_weight",
+    ]
     readonly_fields = ["created_at", "updated_at"]
+    fieldsets = [
+        (
+            "Search Method Selection",
+            {
+                "fields": ["default_search_type"],
+                "description": "Choose the default search method to use when no specific type is requested.",
+            },
+        ),
+        (
+            "Enable/Disable Search Methods",
+            {
+                "fields": ["fts_enabled", "trigram_enabled", "vector_enabled"],
+                "description": "Control which search methods are available. At least one method must be enabled.",
+            },
+        ),
+        (
+            "Search Method Weights",
+            {
+                "fields": ["fts_weight", "trigram_weight", "vector_weight"],
+                "description": "Adjust the relative importance of each search method in hybrid search results.",
+            },
+        ),
+        (
+            "Metadata",
+            {
+                "fields": ["created_at", "updated_at"],
+            },
+        ),
+    ]
+
+    @admin.display(description="Enabled Methods")
+    def search_methods_status(self, obj):
+        """Display which search methods are enabled."""
+        methods = []
+        if obj.fts_enabled:
+            methods.append("FTS")
+        if obj.trigram_enabled:
+            methods.append("Trigram")
+        if obj.vector_enabled:
+            methods.append("Vector")
+        return ", ".join(methods) if methods else "None"
 
     def has_add_permission(self, request):
         return not SearchConfig.objects.exists()

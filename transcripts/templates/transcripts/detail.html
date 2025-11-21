@@ -175,6 +175,146 @@
             .tab-content.active {
                 display: block;
             }
+
+            .search-box {
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                margin-bottom: 20px;
+            }
+
+            .search-form {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+
+            input[type="text"] {
+                flex: 1;
+                padding: 12px 16px;
+                font-size: 16px;
+                border: 2px solid #ddd;
+                border-radius: 4px;
+                transition: border-color 0.3s;
+            }
+
+            input[type="text"]:focus {
+                outline: none;
+                border-color: #007bff;
+            }
+
+            button[type="submit"] {
+                padding: 12px 24px;
+                font-size: 16px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+
+            button[type="submit"]:hover {
+                background-color: #0056b3;
+            }
+
+            .search-options {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                flex-wrap: wrap;
+            }
+
+            .search-type-label {
+                font-size: 14px;
+                color: #555;
+                font-weight: 500;
+            }
+
+            .toggle-switch {
+                display: inline-flex;
+                align-items: center;
+                background-color: #e9ecef;
+                border-radius: 20px;
+                padding: 4px;
+                cursor: pointer;
+                border: 2px solid #dee2e6;
+                transition: all 0.3s ease;
+            }
+
+            .toggle-switch.active {
+                border-color: #007bff;
+                background-color: #e7f3ff;
+            }
+
+            .toggle-option {
+                padding: 8px 16px;
+                border-radius: 16px;
+                font-size: 14px;
+                font-weight: 500;
+                transition: all 0.3s ease;
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                color: #666;
+            }
+
+            .toggle-option.active {
+                background-color: white;
+                color: #007bff;
+                box-shadow: 0 2px 4px rgba(0,123,255,0.2);
+            }
+
+            .toggle-option:hover:not(.active) {
+                color: #333;
+            }
+
+            .segment-result {
+                background: #f9f9f9;
+                padding: 15px;
+                margin-bottom: 10px;
+                border-left: 4px solid #007bff;
+                border-radius: 4px;
+            }
+
+            .segment-time {
+                color: #007bff;
+                font-weight: 500;
+                font-size: 13px;
+                margin-bottom: 5px;
+            }
+
+            .segment-text {
+                color: #444;
+                line-height: 1.6;
+            }
+
+            .search-results {
+                margin-top: 20px;
+            }
+
+            .results-info {
+                color: #666;
+                font-size: 14px;
+                margin-bottom: 15px;
+            }
+
+            .no-results {
+                padding: 20px;
+                color: #999;
+                text-align: center;
+            }
+
+            .warning-box {
+                margin-top: 15px;
+                padding: 12px;
+                background-color: #fff3cd;
+                border: 1px solid #ffeaa7;
+                border-radius: 4px;
+                color: #856404;
+                font-size: 14px;
+            }
         </style>
     </head>
     <body>
@@ -203,6 +343,92 @@
                     <lite-youtube videoid="{{ transcript.youtube_id }}"></lite-youtube>
                 </div>
             </div>
+
+            <div class="search-box">
+                <form method="get" action="" id="search-form" class="search-form">
+                    <input
+                        type="text"
+                        name="q"
+                        placeholder="Search within this transcript..."
+                        value="{{ query }}"
+                    >
+                    <button type="submit">Search</button>
+                    <input type="hidden" name="search_type" id="search_type_input" value="{{ search_type }}">
+                </form>
+
+                <div class="search-options">
+                    <span class="search-type-label">Search Method:</span>
+                    <div class="toggle-switch" id="toggle-switch">
+                        {% if config.fts_enabled %}
+                            <button
+                                type="button"
+                                class="toggle-option {% if search_type == 'fts' %}active{% endif %}"
+                                data-value="fts"
+                                onclick="setSearchType('fts', event)"
+                            >
+                                Full Text Search
+                            </button>
+                        {% endif %}
+                        {% if config.trigram_enabled %}
+                            <button
+                                type="button"
+                                class="toggle-option {% if search_type == 'trigram' %}active{% endif %}"
+                                data-value="trigram"
+                                onclick="setSearchType('trigram', event)"
+                            >
+                                Trigram Similarity
+                            </button>
+                        {% endif %}
+                        {% if config.vector_enabled %}
+                            <button
+                                type="button"
+                                class="toggle-option {% if search_type == 'vector' %}active{% endif %}"
+                                data-value="vector"
+                                onclick="setSearchType('vector', event)"
+                            >
+                                Vector Search
+                            </button>
+                        {% endif %}
+                        <button
+                            type="button"
+                            class="toggle-option {% if search_type == 'hybrid' %}active{% endif %}"
+                            data-value="hybrid"
+                            onclick="setSearchType('hybrid', event)"
+                            title="Combines all enabled search methods"
+                        >
+                            Hybrid
+                        </button>
+                    </div>
+                </div>
+
+                {% if warning_message %}
+                    <div class="warning-box">
+                        ⚠️ {{ warning_message }}
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if query %}
+                <div class="search-results">
+                    {% if segments %}
+                        <div class="results-info">
+                            Found {{ segments.count }} result{{ segments.count|pluralize }} in this transcript
+                        </div>
+                        {% for segment in segments %}
+                            <div class="segment-result">
+                                <div class="segment-time">
+                                    {{ segment.start_time }} - {{ segment.end_time }}
+                                </div>
+                                <div class="segment-text">{{ segment.text }}</div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="no-results">
+                            No matches found in this transcript
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
 
             <div class="content-section">
                 <div class="tabs">
@@ -249,6 +475,28 @@
 
             // Add active class to clicked tab
                 event.target.classList.add('active');
+            }
+
+            function setSearchType(type, event) {
+                event.preventDefault();
+
+                // Update hidden input
+                document.getElementById('search_type_input').value = type;
+
+                // Update active button styling
+                const buttons = document.querySelectorAll('.toggle-option');
+                buttons.forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.getAttribute('data-value') === type) {
+                        btn.classList.add('active');
+                    }
+                });
+
+                // Submit form if there's a query
+                const queryInput = document.querySelector('input[name="q"]');
+                if (queryInput.value.trim()) {
+                    document.getElementById('search-form').submit();
+                }
             }
         </script>
         <script src="https://cdn.jsdelivr.net/npm/lite-youtube-embed@0.3.4/src/lite-yt-embed.js"></script>

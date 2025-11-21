@@ -239,32 +239,52 @@
                     <div class="search-options">
                         <span class="search-type-label">Search Method:</span>
                         <div class="toggle-switch" id="toggle-switch">
+                            {% if config.fts_enabled %}
+                                <button
+                                    type="button"
+                                    class="toggle-option {% if search_type == 'fts' %}active{% endif %}"
+                                    data-value="fts"
+                                    onclick="setSearchType('fts', event)"
+                                >
+                                    Full Text Search
+                                </button>
+                            {% endif %}
+                            {% if config.trigram_enabled %}
+                                <button
+                                    type="button"
+                                    class="toggle-option {% if search_type == 'trigram' %}active{% endif %}"
+                                    data-value="trigram"
+                                    onclick="setSearchType('trigram', event)"
+                                >
+                                    Trigram Similarity
+                                </button>
+                            {% endif %}
+                            {% if config.vector_enabled %}
+                                <button
+                                    type="button"
+                                    class="toggle-option {% if search_type == 'vector' %}active{% endif %}"
+                                    data-value="vector"
+                                    onclick="setSearchType('vector', event)"
+                                >
+                                    Vector Search
+                                </button>
+                            {% endif %}
                             <button
                                 type="button"
-                                class="toggle-option {% if search_type != 'trigram' and search_type != 'vector' %}active{% endif %}"
-                                data-value="fts"
-                                onclick="setSearchType('fts', event)"
+                                class="toggle-option {% if search_type == 'hybrid' or not config.get_enabled_methods %}active{% endif %}"
+                                data-value="hybrid"
+                                onclick="setSearchType('hybrid', event)"
+                                title="Combines all enabled search methods"
                             >
-                                Full Text Search
-                            </button>
-                            <button
-                                type="button"
-                                class="toggle-option {% if search_type == 'trigram' %}active{% endif %}"
-                                data-value="trigram"
-                                onclick="setSearchType('trigram', event)"
-                            >
-                                Trigram Similarity
-                            </button>
-                            <button
-                                type="button"
-                                class="toggle-option {% if search_type == 'vector' %}active{% endif %}"
-                                data-value="vector"
-                                onclick="setSearchType('vector', event)"
-                            >
-                                Vector/Semantic
+                                Hybrid
                             </button>
                         </div>
                     </div>
+                    {% if warning_message %}
+                        <div style="margin-top: 15px; padding: 12px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; color: #856404; font-size: 14px;">
+                            ⚠️ {{ warning_message }}
+                        </div>
+                    {% endif %}
                 </form>
             </div>
 

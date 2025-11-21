@@ -114,48 +114,85 @@ def fts_search_segments(query):
     ).order_by("transcript", "segment_index")
 
 
+def vector_search_segments(query):
+    """
+    Search SRTSegment using vector embeddings for semantic search.
+    Currently a placeholder - implementation requires embedding generation.
+    """
+    if not query or not query.strip():
+        return SRTSegment.objects.none()
+
+    # Placeholder for vector search implementation
+    # Would require:
+    # 1. Converting query to embedding using same model as stored embeddings
+    # 2. Computing similarity between query embedding and stored embeddings
+    # 3. Returning segments ordered by similarity score
+    return SRTSegment.objects.none()
+
+
 def hybrid_search_segments(query):
     """
-    Hybrid search combining trigram and full text search.
-    Uses weighted scoring to rank results.
+    Hybrid search combining enabled search methods with weighted scoring.
+    Only uses search methods that are enabled in SearchConfig.
     """
     if not query or not query.strip():
         return SRTSegment.objects.none()
 
     config = get_search_config()
     query = query.strip()
+    enabled_methods = config.get_enabled_methods()
 
-    # Trigram search with similarity score
-    trigram_results = trigram_search_segments(query)
-    trigram_dict = {
-        seg.id: seg for seg in trigram_results.values_list("id", flat=True)
-    }
+    if not enabled_methods:
+        return SRTSegment.objects.none()
 
-    # FTS search
-    fts_results = fts_search_segments(query)
-    fts_dict = {seg.id: seg for seg in fts_results.values_list("id", flat=True)}
+    combined_ids = set()
 
-    # Combine results with weighted scores
-    combined_ids = set(trigram_dict.keys()) | set(fts_dict.keys())
+    # Trigram search if enabled
+    if "trigram" in enabled_methods:
+        trigram_results = trigram_search_segments(query)
+        combined_ids.update(trigram_results.values_list("id", flat=True))
+
+    # FTS search if enabled
+    if "fts" in enabled_methods:
+        fts_results = fts_search_segments(query)
+        combined_ids.update(fts_results.values_list("id", flat=True))
+
+    # Vector search if enabled (when implemented)
+    if "vector" in enabled_methods:
+        vector_results = vector_search_segments(query)
+        combined_ids.update(vector_results.values_list("id", flat=True))
 
     if not combined_ids:
         return SRTSegment.objects.none()
 
-    # Annotate with combined score
-    results = SRTSegment.objects.filter(id__in=combined_ids).annotate(
-        trigram_score=TrigramSimilarity("text", query),
-    )
+    # Annotate with scores from enabled methods
+    results = SRTSegment.objects.filter(id__in=combined_ids)
 
-    # Calculate weighted score
-    results = results.annotate(
-        combined_score=Cast(
-            Greatest(
-                F("trigram_score") * Value(config.trigram_weight),
-                output_field=FloatField(),
-            ),
-            FloatField(),
+    if "trigram" in enabled_methods:
+        results = results.annotate(
+            trigram_score=TrigramSimilarity("text", query),
         )
-    )
+    else:
+        results = results.annotate(
+            trigram_score=Value(0.0, output_field=FloatField()),
+        )
+
+    # Calculate weighted score based on enabled methods
+    score_components = []
+    if "trigram" in enabled_methods:
+        score_components.append(F("trigram_score") * Value(config.trigram_weight))
+
+    if score_components:
+        results = results.annotate(
+            combined_score=Cast(
+                Greatest(*score_components, output_field=FloatField()),
+                FloatField(),
+            )
+        )
+    else:
+        results = results.annotate(
+            combined_score=Value(0.0, output_field=FloatField()),
+        )
 
     return results.order_by("-combined_score")
 
@@ -175,17 +212,24 @@ def search_segments(query, search_type=None):
     if not query or not query.strip():
         return SRTSegment.objects.none()
 
+    config = get_search_config()
+
     if search_type is None:
-        config = get_search_config()
         search_type = config.default_search_type
 
-    if search_type == "trigram":
+    # Validate that the requested search type is enabled
+    if search_type != "hybrid":
+        if not config.is_method_enabled(search_type):
+            # Fall back to hybrid if requested method is disabled
+            search_type = "hybrid"
+
+    if search_type == "trigram" and config.trigram_enabled:
         return trigram_search_segments(query)
-    elif search_type == "fts":
+    elif search_type == "fts" and config.fts_enabled:
         return fts_search_segments(query)
     elif search_type == "vector":
         return vector_search_segments(query)
-    else:  # hybrid or default
+    else:  # hybrid or fallback
         return hybrid_search_segments(query)
 
 
