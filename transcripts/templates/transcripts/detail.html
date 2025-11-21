@@ -270,6 +270,52 @@
                 color: #333;
             }
 
+            .pagination {
+                margin-top: 20px;
+                padding: 20px;
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+
+            .pagination-info {
+                text-align: center;
+                color: #666;
+                font-size: 14px;
+                margin-bottom: 15px;
+            }
+
+            .pagination-controls {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+
+            .page-link {
+                padding: 8px 12px;
+                background: white;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                color: #007bff;
+                text-decoration: none;
+                font-size: 14px;
+                transition: all 0.3s;
+            }
+
+            .page-link:hover:not(.active) {
+                background: #f8f9fa;
+                border-color: #007bff;
+            }
+
+            .page-link.active {
+                background: #007bff;
+                color: white;
+                border-color: #007bff;
+                cursor: default;
+            }
+
             .segment-result {
                 background: #f9f9f9;
                 padding: 15px;
@@ -412,7 +458,8 @@
                 <div class="search-results">
                     {% if segments %}
                         <div class="results-info">
-                            Found {{ segments.count }} result{{ segments.count|pluralize }} in this transcript
+                            Found {{ segments.paginator.count }} result{{ segments.paginator.count|pluralize }} in this transcript
+                            (showing {{ segments.start_index }}-{{ segments.end_index }})
                         </div>
                         {% for segment in segments %}
                             <div class="segment-result">
@@ -422,6 +469,43 @@
                                 <div class="segment-text">{{ segment.text }}</div>
                             </div>
                         {% endfor %}
+
+                        {% if segments.has_other_pages %}
+                            <div class="pagination">
+                                <div class="pagination-info">
+                                    Page {{ segments.number }} of {{ segments.paginator.num_pages }}
+                                </div>
+                                <div class="pagination-controls">
+                                    {% if segments.has_previous %}
+                                        <a href="?q={{ query }}&search_type={{ search_type }}&page=1" class="page-link">
+                                            &laquo; First
+                                        </a>
+                                        <a href="?q={{ query }}&search_type={{ search_type }}&page={{ segments.previous_page_number }}" class="page-link">
+                                            &lsaquo; Previous
+                                        </a>
+                                    {% endif %}
+
+                                    {% for num in segments.paginator.page_range %}
+                                        {% if segments.number == num %}
+                                            <span class="page-link active">{{ num }}</span>
+                                        {% elif num > segments.number|add:'-3' and num < segments.number|add:'3' %}
+                                            <a href="?q={{ query }}&search_type={{ search_type }}&page={{ num }}" class="page-link">
+                                                {{ num }}
+                                            </a>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if segments.has_next %}
+                                        <a href="?q={{ query }}&search_type={{ search_type }}&page={{ segments.next_page_number }}" class="page-link">
+                                            Next &rsaquo;
+                                        </a>
+                                        <a href="?q={{ query }}&search_type={{ search_type }}&page={{ segments.paginator.num_pages }}" class="page-link">
+                                            Last &raquo;
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
                     {% else %}
                         <div class="no-results">
                             No matches found in this transcript
