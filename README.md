@@ -6,9 +6,13 @@ This application transcribes audio and video files (including YouTube videos) us
 
 ## About This Project
 
-This project was built during a livestream collaboration between Jay Miller and Jeff Triplett:
+This project was built during livestream collaborations between Jay Miller and Jeff Triplett:
 
-- **Part 1**: [Building a Django Transcription App with MLX Whisper](https://www.youtube.com/live/ycjNznwGVn0)
+### Livestreams & Related Content
+
+- **Part 1**: [EITR Project: Django-Transcripts - more search types and looking at the DB](https://www.youtube.com/watch?v=ycjNznwGVn0)
+- **Part 2**: [Django Transcription App Development Continued](https://www.youtube.com/watch?v=wBUm3126BwE)
+- **Aiven**: [Elephant in the Room, Episode 1: Working with Long Form Text in PostgreSQL and Django](https://www.youtube.com/watch?v=-GCASa5xWxw)
 
 ## Features
 
