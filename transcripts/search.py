@@ -85,7 +85,7 @@ def vector_search_segments(query):
         return SRTSegment.objects.none()
 
     # Fetch segments and preserve order
-    segments_dict = {seg.id: seg for seg in SRTSegment.objects.filter(id__in=result_ids)}
+    {seg.id: seg for seg in SRTSegment.objects.filter(id__in=result_ids)}
     return SRTSegment.objects.filter(id__in=result_ids).order_by("id")  # Return in order they were found
 
 

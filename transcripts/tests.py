@@ -288,7 +288,7 @@ class TestHybridSearchSegments:
     def test_hybrid_search_fts_only_enabled(self):
         """Test hybrid search with only FTS enabled."""
         SearchConfig.objects.all().delete()
-        config = SearchConfig.objects.create(
+        SearchConfig.objects.create(
             fts_enabled=True,
             trigram_enabled=False,
             vector_enabled=False,
@@ -303,7 +303,7 @@ class TestHybridSearchSegments:
     def test_hybrid_search_trigram_only_enabled(self):
         """Test hybrid search with only trigram enabled."""
         SearchConfig.objects.all().delete()
-        config = SearchConfig.objects.create(
+        SearchConfig.objects.create(
             fts_enabled=False,
             trigram_enabled=True,
             vector_enabled=False,
@@ -318,7 +318,7 @@ class TestHybridSearchSegments:
     def test_hybrid_search_fts_and_trigram_enabled(self):
         """Test hybrid search with both FTS and trigram enabled."""
         SearchConfig.objects.all().delete()
-        config = SearchConfig.objects.create(
+        SearchConfig.objects.create(
             fts_enabled=True,
             trigram_enabled=True,
             vector_enabled=False,
@@ -339,7 +339,7 @@ class TestHybridSearchSegments:
     def test_hybrid_search_no_methods_enabled(self):
         """Test hybrid search when no methods are enabled."""
         SearchConfig.objects.all().delete()
-        config = SearchConfig.objects.create(
+        SearchConfig.objects.create(
             fts_enabled=False,
             trigram_enabled=False,
             vector_enabled=False,
@@ -352,14 +352,14 @@ class TestHybridSearchSegments:
     def test_hybrid_search_respects_config_toggles(self):
         """Test that hybrid search respects SearchConfig toggles."""
         SearchConfig.objects.all().delete()
-        config = SearchConfig.objects.create(
+        SearchConfig.objects.create(
             fts_enabled=True,
             trigram_enabled=False,
             vector_enabled=False,
         )
 
         transcript = baker.make(Transcript, text_content="test content")
-        segment = baker.make(SRTSegment, transcript=transcript, text="test")
+        baker.make(SRTSegment, transcript=transcript, text="test")
 
         # With trigram disabled, should only use FTS
         result = hybrid_search_segments("test")
@@ -395,14 +395,14 @@ class TestSearchSegmentsDispatcher:
     def test_search_segments_uses_default_type(self):
         """Test that search_segments uses default search type."""
         SearchConfig.objects.all().delete()
-        config = SearchConfig.objects.create(
+        SearchConfig.objects.create(
             default_search_type="hybrid",
             fts_enabled=True,
             trigram_enabled=True,
         )
 
         transcript = baker.make(Transcript, text_content="test content")
-        segment = baker.make(SRTSegment, transcript=transcript, text="test")
+        baker.make(SRTSegment, transcript=transcript, text="test")
 
         result = search_segments("test")
         assert isinstance(result, QuerySet)
@@ -410,10 +410,10 @@ class TestSearchSegmentsDispatcher:
     def test_search_segments_explicit_fts_type(self):
         """Test search_segments with explicit FTS type."""
         SearchConfig.objects.all().delete()
-        config = SearchConfig.objects.create(fts_enabled=True)
+        SearchConfig.objects.create(fts_enabled=True)
 
         transcript = baker.make(Transcript, text_content="test content")
-        segment = baker.make(SRTSegment, transcript=transcript, text="test")
+        baker.make(SRTSegment, transcript=transcript, text="test")
 
         result = search_segments("test", search_type="fts")
         assert isinstance(result, QuerySet)
@@ -421,10 +421,10 @@ class TestSearchSegmentsDispatcher:
     def test_search_segments_explicit_trigram_type(self):
         """Test search_segments with explicit trigram type."""
         SearchConfig.objects.all().delete()
-        config = SearchConfig.objects.create(trigram_enabled=True)
+        SearchConfig.objects.create(trigram_enabled=True)
 
         transcript = baker.make(Transcript)
-        segment = baker.make(SRTSegment, transcript=transcript, text="hello world")
+        baker.make(SRTSegment, transcript=transcript, text="hello world")
 
         result = search_segments("hello", search_type="trigram")
         assert isinstance(result, QuerySet)
@@ -432,13 +432,13 @@ class TestSearchSegmentsDispatcher:
     def test_search_segments_fallback_when_fts_disabled(self):
         """Test that search_segments falls back to hybrid when FTS is disabled."""
         SearchConfig.objects.all().delete()
-        config = SearchConfig.objects.create(
+        SearchConfig.objects.create(
             fts_enabled=False,
             trigram_enabled=True,
         )
 
         transcript = baker.make(Transcript)
-        segment = baker.make(SRTSegment, transcript=transcript, text="hello")
+        baker.make(SRTSegment, transcript=transcript, text="hello")
 
         # Request FTS but it's disabled, should fall back to hybrid
         result = search_segments("hello", search_type="fts")
@@ -447,12 +447,12 @@ class TestSearchSegmentsDispatcher:
     def test_search_segments_fallback_when_trigram_disabled(self):
         """Test that search_segments falls back to hybrid when trigram is disabled."""
         SearchConfig.objects.all().delete()
-        config = SearchConfig.objects.create(
+        SearchConfig.objects.create(
             fts_enabled=True,
             trigram_enabled=False,
         )
 
-        transcript = baker.make(Transcript, text_content="test")
+        baker.make(Transcript, text_content="test")
 
         # Request trigram but it's disabled, should fall back to hybrid
         result = search_segments("test", search_type="trigram")
@@ -461,13 +461,13 @@ class TestSearchSegmentsDispatcher:
     def test_search_segments_hybrid_always_available(self):
         """Test that hybrid search is always available as fallback."""
         SearchConfig.objects.all().delete()
-        config = SearchConfig.objects.create(
+        SearchConfig.objects.create(
             fts_enabled=True,
             trigram_enabled=True,
         )
 
         transcript = baker.make(Transcript, text_content="test")
-        segment = baker.make(SRTSegment, transcript=transcript, text="test")
+        baker.make(SRTSegment, transcript=transcript, text="test")
 
         result = search_segments("test", search_type="hybrid")
         assert isinstance(result, QuerySet)
@@ -477,7 +477,7 @@ class TestSearchSegmentsDispatcher:
         SearchConfig.objects.all().delete()
         SearchConfig.objects.create()
 
-        transcript = baker.make(Transcript, text_content="test")
+        baker.make(Transcript, text_content="test")
 
         result = search_segments("  test  ")
         assert isinstance(result, QuerySet)
@@ -485,7 +485,7 @@ class TestSearchSegmentsDispatcher:
     def test_search_segments_none_search_type_uses_default(self):
         """Test that None search_type uses default from config."""
         SearchConfig.objects.all().delete()
-        config = SearchConfig.objects.create(default_search_type="hybrid")
+        SearchConfig.objects.create(default_search_type="hybrid")
 
         result = search_segments("test", search_type=None)
         assert isinstance(result, QuerySet)
@@ -511,7 +511,7 @@ class TestSearchToggleCombinations:
     def test_no_methods_enabled_hybrid_returns_empty(self):
         """Test that hybrid search returns empty when no methods enabled."""
         SearchConfig.objects.all().delete()
-        config = SearchConfig.objects.create(
+        SearchConfig.objects.create(
             fts_enabled=False,
             trigram_enabled=False,
             vector_enabled=False,
