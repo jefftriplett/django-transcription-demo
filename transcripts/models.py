@@ -130,7 +130,7 @@ class SearchConfig(models.Model):
         help_text="Enable Trigram Search",
     )
     vector_enabled = models.BooleanField(
-        default=False,
+        default=True,
         help_text="Enable Vector/Semantic Search (requires embeddings)",
     )
 
