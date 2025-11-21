@@ -3,6 +3,9 @@ x-common-settings: &common-settings
     context: .
     dockerfile: ./Dockerfile
     target: release
+  # depends_on:
+  #   db:
+  #     condition: service_healthy
   environment:
     - "ALLOWED_HOSTS=*"
     - "DJANGO_DEBUG=true"
@@ -12,10 +15,6 @@ x-common-settings: &common-settings
     - .:/src:cache
 
 services:
-  utility:
-    <<: *common-settings
-    command: ["uv", "run", "-m", "manage", "--version"]
-    tty: true
 
   db:
     environment:
@@ -32,18 +31,28 @@ services:
       - .:/src:cache
       - postgres-data:/var/lib/postgresql/data/
 
+  utility:
+    <<: *common-settings
+    command: [
+      "uv",
+      "run",
+      "-m",
+      "manage",
+      "--version"
+    ]
+    tty: true
+
   web:
     <<: *common-settings
-    command:
-      [
-        "uv",
-        "run",
-        "-m",
-        "manage",
-        "devserver",
-        "--skip-checks",
-        "0.0.0.0:8000",
-      ]
+    command: [
+      "uv",
+      "run",
+      "-m",
+      "manage",
+      "devserver",
+      "--skip-checks",
+      "0.0.0.0:8000"
+    ]
     entrypoint: ["/src/compose-entrypoint.sh"]
     init: true
     ports:
