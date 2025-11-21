@@ -119,6 +119,22 @@ class SearchConfig(models.Model):
         default="hybrid",
         help_text="Default search type to use",
     )
+
+    # Enable/Disable individual search methods
+    fts_enabled = models.BooleanField(
+        default=True,
+        help_text="Enable Full Text Search",
+    )
+    trigram_enabled = models.BooleanField(
+        default=True,
+        help_text="Enable Trigram Search",
+    )
+    vector_enabled = models.BooleanField(
+        default=False,
+        help_text="Enable Vector/Semantic Search (requires embeddings)",
+    )
+
+    # Weights for hybrid search
     fts_weight = models.FloatField(
         default=0.3,
         help_text="Weight for Full Text Search results (0-1)",
@@ -140,3 +156,24 @@ class SearchConfig(models.Model):
 
     def __str__(self):
         return f"Search Config ({self.default_search_type})"
+
+    def get_enabled_methods(self):
+        """Return list of enabled search methods."""
+        enabled = []
+        if self.fts_enabled:
+            enabled.append("fts")
+        if self.trigram_enabled:
+            enabled.append("trigram")
+        if self.vector_enabled:
+            enabled.append("vector")
+        return enabled
+
+    def is_method_enabled(self, method):
+        """Check if a specific search method is enabled."""
+        if method == "fts":
+            return self.fts_enabled
+        elif method == "trigram":
+            return self.trigram_enabled
+        elif method == "vector":
+            return self.vector_enabled
+        return False
