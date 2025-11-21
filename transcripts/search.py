@@ -85,7 +85,6 @@ def vector_search_segments(query):
         return SRTSegment.objects.none()
 
     # Fetch segments and preserve order
-    {seg.id: seg for seg in SRTSegment.objects.filter(id__in=result_ids)}
     return SRTSegment.objects.filter(id__in=result_ids).order_by("id")  # Return in order they were found
 
 
@@ -106,22 +105,6 @@ def fts_search_segments(query):
 
     # Return segments from matching transcripts
     return SRTSegment.objects.filter(transcript__in=matching_transcripts).order_by("transcript", "segment_index")
-
-
-def vector_search_segments(query):
-    """
-    Search SRTSegment using vector embeddings for semantic search.
-    Currently a placeholder - implementation requires embedding generation.
-    """
-    if not query or not query.strip():
-        return SRTSegment.objects.none()
-
-    # Placeholder for vector search implementation
-    # Would require:
-    # 1. Converting query to embedding using same model as stored embeddings
-    # 2. Computing similarity between query embedding and stored embeddings
-    # 3. Returning segments ordered by similarity score
-    return SRTSegment.objects.none()
 
 
 def hybrid_search_segments(query):
