@@ -3,7 +3,7 @@ Search utilities for transcripts with support for Full Text Search, Trigram Sear
 """
 
 from django.contrib.postgres.search import SearchQuery, SearchRank, TrigramSimilarity
-from django.db.models import F, FloatField, Q, Value
+from django.db.models import F, FloatField, Value
 from django.db.models.functions import Cast, Greatest
 from sentence_transformers import SentenceTransformer
 
@@ -86,9 +86,7 @@ def vector_search_segments(query):
 
     # Fetch segments and preserve order
     segments_dict = {seg.id: seg for seg in SRTSegment.objects.filter(id__in=result_ids)}
-    return SRTSegment.objects.filter(id__in=result_ids).order_by(
-        "id"
-    )  # Return in order they were found
+    return SRTSegment.objects.filter(id__in=result_ids).order_by("id")  # Return in order they were found
 
 
 def fts_search_segments(query):
@@ -104,14 +102,10 @@ def fts_search_segments(query):
     search_query = SearchQuery(query, search_type="websearch", config="english")
 
     # Get matching transcripts using FTS
-    matching_transcripts = Transcript.objects.filter(
-        search_vector=search_query
-    )
+    matching_transcripts = Transcript.objects.filter(search_vector=search_query)
 
     # Return segments from matching transcripts
-    return SRTSegment.objects.filter(
-        transcript__in=matching_transcripts
-    ).order_by("transcript", "segment_index")
+    return SRTSegment.objects.filter(transcript__in=matching_transcripts).order_by("transcript", "segment_index")
 
 
 def vector_search_segments(query):

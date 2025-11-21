@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, render
 
-from .models import Transcript, SRTSegment, SearchConfig
+from .models import Transcript, SearchConfig
 from .search import search_transcripts, search_segments
 
 
@@ -18,7 +18,9 @@ def homepage(request):
         # Validate requested search type is enabled
         if search_type and not config.is_method_enabled(search_type):
             # Use default search type if requested one is disabled
-            warning_message = f"Search method '{search_type}' is disabled. Using '{config.default_search_type}' instead."
+            warning_message = (
+                f"Search method '{search_type}' is disabled. Using '{config.default_search_type}' instead."
+            )
             search_type = config.default_search_type
 
         # Search transcripts using specified search type
@@ -65,7 +67,9 @@ def transcript_detail(request, youtube_id):
         # Validate requested search type is enabled
         if search_type and not config.is_method_enabled(search_type):
             # Use default search type if requested one is disabled
-            warning_message = f"Search method '{search_type}' is disabled. Using '{config.default_search_type}' instead."
+            warning_message = (
+                f"Search method '{search_type}' is disabled. Using '{config.default_search_type}' instead."
+            )
             search_type = config.default_search_type
 
         # Search segments within this transcript

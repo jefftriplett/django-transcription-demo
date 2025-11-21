@@ -24,7 +24,7 @@ class ModelChoices(str, Enum):
 
 def extract_youtube_id(filename: str) -> str:
     """Extract YouTube ID from filename. Expected format: 'Title [YouTubeID].ext'"""
-    match = re.search(r'\[([a-zA-Z0-9_-]{11})\]', filename)
+    match = re.search(r"\[([a-zA-Z0-9_-]{11})\]", filename)
     if match:
         return match.group(1)
     # Fallback to filename stem if no YouTube ID found
